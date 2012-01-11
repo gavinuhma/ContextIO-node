@@ -9,86 +9,59 @@ var ContextIO = require('../lib/ContextIO.js'),
 var ctxio = new ContextIO.Client(hlp.apiVersion, 'https://api.context.io', hlp.apiKeys);
 
 vows.describe('ContextIO/accounts/sources').addBatch({
-	'A list': {
-		'being fetched': {
-			topic: function () {
-				ctxio.accounts(tData.accountId).sources().get(this.callback);
-			},
-			'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources', 'GET'),
-			'responds with 200': hlp.macros.assertStatus(200),
-			'returns an array': hlp.macros.assertBodyType('isArray')
-		}
+	'A list being fetched': {
+		topic: function () {
+			ctxio.accounts(tData.accountId).sources().get(this.callback);
+		},
+		'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources', 'GET'),
+		'responds with 200': hlp.macros.assertStatus(200),
+		'returns an array': hlp.macros.assertBodyType('isArray')
 	}
 }).addBatch({
-	'Manipulating instances ': {
-		'by creating one': {
-			topic: function () {
-				ctxio.accounts(tData.accountId).sources().post(tData.createParams, this.callback);
+	'Manipulating instances  by creating one': {
+		topic: function () {
+			ctxio.accounts(tData.accountId).sources().post(tData.createParams, this.callback);
+		},
+		'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources', 'POST'),
+		'responds with 201': hlp.macros.assertStatus(201),
+		
+		'and fetching it': {
+			topic: function (createResp) {
+				ctxio.accounts(tData.accountId).sources(createResp.body.label).get(this.callback);
 			},
-			'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources', 'POST'),
-			'responds with 201': hlp.macros.assertStatus(201),
+			'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'GET'),
+			'responds with 200': hlp.macros.assertStatus(200),
+			'returns an object': hlp.macros.assertBodyType('isObject'),
+			'validates the instance has the correct properties': function (err, r) {
+				assert.equal(r.body.server, tData.createParams.server);
+				assert.equal(r.body.username, tData.createParams.username);
+				assert.equal(r.body.authentication_type, 'oauth');
+			},
 			
-			'and fetching it': {
-				topic: function (createResp) {
-					ctxio.accounts(tData.accountId).sources(createResp.body.label).get(this.callback);
+			'then resetting its status': {
+				topic: function (fetchResp) {
+					ctxio.accounts(tData.accountId).sources(fetchResp.body.label).post({status: 1}, this.callback);
 				},
-				'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'GET'),
+				'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'POST'),
 				'responds with 200': hlp.macros.assertStatus(200),
-				'returns an object': hlp.macros.assertBodyType('isObject'),
-				'validates the instance has the correct properties': function (err, r) {
-					assert.equal(r.body.server, tData.createParams.server);
-					assert.equal(r.body.username, tData.createParams.username);
-					assert.equal(r.body.authentication_type, 'oauth');
-				},
 				
-				'then resetting its status': {
-					topic: function (fetchResp) {
-						ctxio.accounts(tData.accountId).sources(fetchResp.body.label).post({status: 1}, this.callback);
+				'then deleting it': {
+					topic: function (a, b, fetchResp) {
+						ctxio.accounts(tData.accountId).sources(fetchResp.body.label).delete(this.callback);
 					},
-					'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'POST'),
+					'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'DELETE'),
 					'responds with 200': hlp.macros.assertStatus(200),
 					
-					'then deleting it': {
-						topic: function (a, b, fetchResp) {
-							ctxio.accounts(tData.accountId).sources(fetchResp.body.label).delete(this.callback);
+					'and attempting to fetch it': {
+						topic: function (a, b, c, d, fetchResp) {
+							ctxio.accounts(tData.accountId).sources(fetchResp.body.label).get(this.callback);
 						},
-						'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'DELETE'),
-						'responds with 200': hlp.macros.assertStatus(200),
-						
-						'and attempting to fetch it': {
-							topic: function (a, b, c, d, fetchResp) {
-								ctxio.accounts(tData.accountId).sources(fetchResp.body.label).get(this.callback);
-							},
-							'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'GET'),
-							'validates the instance has been deleted': hlp.macros.assertStatus(404)
-						}
+						'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/*', 'GET'),
+						'validates the instance has been deleted': hlp.macros.assertStatus(404)
 					}
 				}
-				
 			}
-		}
-	}
-}).addBatch({
-	'Playing with folders': {
-		'listing them': {
-			topic: function () {
-				ctxio.accounts(tData.accountId).sources(tData.label).folders().get(this.callback);
-			},
-			'made the right API call': hlp.macros.assertCall('accounts/'+tData.accountId+'/sources/'+tData.label+'/folders', 'GET'),
-			'responds with 200': hlp.macros.assertStatus(200),
-			'returns a list of folders': function (err, r){
-				assert.isArray(r.body);
-				assert.ok('name' in r.body[0]);
-				assert.ok('delim' in r.body[0]);
-				assert.ok('nb_messages' in r.body[0]);
-			}
-		},
-		'adding a new one': {
-			topic: function () {
-				ctxio.accounts(tData.folderAddAccount).sources(tData.folderAddSource).folders('tests/date-'+(new Date()).getTime()).put(this.callback);
-			},
-			'made the right API call': hlp.macros.assertCall('accounts/'+tData.folderAddAccount+'/sources/'+tData.folderAddSource+'/folders/tests/*', 'PUT'),
-			'responds with 201': hlp.macros.assertStatus(201)
+			
 		}
 	}
 }).addBatch({
