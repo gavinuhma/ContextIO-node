@@ -52,7 +52,7 @@ Instantiating the client while specifying the API version and endpoint:
 Doing calls to the Context.IO API
 ---------------------------------
 
-Complete documentation is available on [http://context.io/docs/latest] and you can also play around with the API using the [Context.IO Explorer][https://console.context.io/#explore] (developer account required).
+Complete documentation is available on http://context.io/docs/latest and you can also play around with the API using the Context.IO Explorer (https://console.context.io/#explore, developer account required).
 
 The design of this library follows the URI structure very closely. For example, to call:
 
@@ -72,24 +72,24 @@ ctxioClient.accounts().get({limit:15}, function (err, response) {
 Making it more general, the equivalent of this generic URI:
 
 ``` http
-METHOD /2.0/RESOURCE/INSTANCE_ID/SUB_RESOURCE/INSTANCE_ID/SUB_RESOURCE?PARAMS
+METHOD /2.0/RESOURCE/INSTANCE_ID/SUB_RESOURCE?PARAMS
 ```
 
 would be:
 
 ``` js
-ctxioClient.RESOURCE(INSTANCE_ID).SUB_RESOURCE(INSTANCE_ID).SUB_RESOURCE().METHOD(PARAMS, CALLBACK_FN)
+ctxioClient.RESOURCE(INSTANCE_ID).SUB_RESOURCE().METHOD(PARAMS, CALLBACK_FN)
 ```
 
 ### Parameters
-Parameters are passed as an `Object` with properties matching paramter name. Note that passing parameters for POST or GET work the same: an Object passed as the first argument of the method call.
+Call parameters are passed as an `Object` with properties matching parameter name. Parameters for POST or GET work the same: an Object passed as the first argument of the method call.
 
 ### Callback function
 Your callback function gets 3 arguments:
 
   1. **err** Either null or an `Error` if something went wrong
-  2. **response** An `Object` reprensenting the HTTP response through 3 properties:
-    * *body*: `Object`, `Array` or `String` - If Content-Type is `application/json`m the response body is parsed automatically
+  2. **response** An `Object` representing the HTTP response. It has three properties:
+    * *body*: `Object`, `Array` or `String` - If Content-Type is `application/json`, the response body is parsed automatically
     * *statusCode*: `Number` - The HTTP status code of the response
     * *headers*: `Object` - HTTP headers of the response
   3. **request** An `Object` mainly useful for debugging purposes
