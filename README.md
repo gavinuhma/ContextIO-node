@@ -78,7 +78,7 @@ METHOD /2.0/RESOURCE/INSTANCE_ID/SUB_RESOURCE/INSTANCE_ID/SUB_RESOURCE?PARAMS
 would be:
 
 ``` js
-ctxioClient.RESOURCE(INSTANCE_ID).SUB_RESOURCE(INSTANCE_ID).SUB_RESOURCE().METHOD(PARAMS, CALLBACK_FUNCTION)
+ctxioClient.RESOURCE(INSTANCE_ID).SUB_RESOURCE(INSTANCE_ID).SUB_RESOURCE().METHOD(PARAMS, CALLBACK_FN)
 ```
 
 ### Parameters
@@ -86,6 +86,7 @@ Parameters are passed as an `Object` with properties matching paramter name. Not
 
 ### Callback function
 Your callback function gets 3 arguments:
+
   1. **err** Either null or an `Error` if something went wrong
   2. **response** An `Object` reprensenting the HTTP response through 3 properties:
     * *body*: `Object`, `Array` or `String` - If Content-Type is `application/json`m the response body is parsed automatically
