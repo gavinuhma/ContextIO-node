@@ -18,6 +18,6 @@
 	"main": "./lib/ContextIO",
 	"scripts": { "test": "vows test/*.js --spec" },
 	"engines": {
-		"node": "0.4.12"
+		"node": ">= 0.4.12"
 	}
 }
